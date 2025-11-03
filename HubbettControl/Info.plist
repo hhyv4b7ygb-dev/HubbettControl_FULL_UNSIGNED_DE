@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleDevelopmentRegion</key><string>de</string>
+<key>CFBundleIdentifier</key><string>com.hubbett.HubbettControl</string>
+<key>CFBundleName</key><string>Hubbett Control</string>
+<key>CFBundleDisplayName</key><string>Hubbett</string>
+<key>CFBundleShortVersionString</key><string>1.0</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>UILaunchScreen</key><dict/>
+<key>UIRequiredDeviceCapabilities</key><array><string>arm64</string></array>
+<key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string></array>
+<key>UIUserInterfaceStyle</key><string>Dark</string>
+<key>NSBluetoothAlwaysUsageDescription</key><string>Die App verbindet sich per Bluetooth mit dem Hubbett-Steuergerät.</string>
+<key>NSBluetoothPeripheralUsageDescription</key><string>Bluetooth wird für die Kommunikation mit dem Hubbett benötigt.</string>
+<key>NSMotionUsageDescription</key><string>Bewegungsdaten werden verwendet, um Neigung (Pitch/Roll) anzuzeigen.</string>
+</dict></plist>
