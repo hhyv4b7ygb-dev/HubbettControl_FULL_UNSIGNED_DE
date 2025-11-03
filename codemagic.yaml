@@ -1,0 +1,25 @@
+workflows:
+  ios-app:
+    name: HubbettControl iOS Build (unsigned)
+    environment:
+      vars:
+        XCODE_PROJECT: "HubbettControl.xcodeproj"
+        XCODE_SCHEME: "HubbettControl"
+      xcode: 15.0
+    scripts:
+      - name: Clean and archive app
+        script: |
+          set -e
+          xcodebuild clean -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME"
+          mkdir -p build/ipa
+          xcodebuild             -project "$XCODE_PROJECT"             -scheme "$XCODE_SCHEME"             -configuration Release             -sdk iphoneos             -archivePath build/HubbettControl.xcarchive             archive             CODE_SIGN_IDENTITY=""             CODE_SIGNING_REQUIRED=NO             CODE_SIGNING_ALLOWED=NO
+      - name: Create unsigned .ipa manually
+        script: |
+          mkdir -p build/ipa/Payload
+          APP_PATH=$(find build/HubbettControl.xcarchive/Products/Applications -name "*.app" | head -n 1)
+          echo "Gefundenes App-Bundle: $APP_PATH"
+          cp -R "$APP_PATH" build/ipa/Payload/
+          cd build/ipa
+          zip -r HubbettControl.ipa Payload
+    artifacts:
+      - build/ipa/HubbettControl.ipa
