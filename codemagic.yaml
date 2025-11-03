@@ -7,28 +7,69 @@ workflows:
         XCODE_SCHEME: "HubbettControl"
       xcode: 15.0
     scripts:
-      - name: Clean and archive app
+      - name: Sanity checks (project & scheme)
         script: |
           set -e
-          xcodebuild clean -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME"
+          echo "=== ls -la (repo root) ==="
+          ls -la
+          echo "=== xcodebuild -list ==="
+          xcodebuild -list -project "$XCODE_PROJECT" || true
+          echo "=== showbuildsettings (scheme) ==="
+          xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -showBuildSettings | head -n 50 || true
+
+      - name: Build (compile) to catch swift errors
+        script: |
+          set -e
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            build
+
+      - name: Archive
+        script: |
+          set -e
           mkdir -p build/ipa
           xcodebuild \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
             -configuration Release \
             -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
             -archivePath build/HubbettControl.xcarchive \
-            archive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-      - name: Create unsigned .ipa manually
+            archive
+
+      - name: Verify .app & create unsigned .ipa manually
         script: |
+          set -e
+          APP_PATH=$(find build/HubbettControl.xcarchive/Products/Applications -name "*.app" | head -n 1 || true)
+          echo "Found APP_PATH: $APP_PATH"
+          if [ -z "$APP_PATH" ]; then
+            echo "❌ ERROR: No .app produced. Check scheme/target names and build logs."
+            exit 1
+          fi
+
+          echo "=== du -sh on .app ==="
+          du -sh "$APP_PATH" || true
+
+          # Fail fast if the app is suspiciously tiny (< 5 MB)
+          APP_SIZE_KB=$(du -sk "$APP_PATH" | awk '{print $1}')
+          if [ "$APP_SIZE_KB" -lt 5000 ]; then
+            echo "❌ ERROR: .app too small (${APP_SIZE_KB} KB). Build did not produce a real app. Check compile step."
+            exit 1
+          fi
+
           mkdir -p build/ipa/Payload
-          APP_PATH=$(find build/HubbettControl.xcarchive/Products/Applications -name "*.app" | head -n 1)
-          echo "Gefundenes App-Bundle: $APP_PATH"
           cp -R "$APP_PATH" build/ipa/Payload/
-          cd build/ipa
-          zip -r HubbettControl.ipa Payload
+          (cd build/ipa && zip -r HubbettControl.ipa Payload)
+
+          echo "=== IPA created ==="
+          ls -la build/ipa
+          echo "=== IPA size ==="
+          du -sh build/ipa/HubbettControl.ipa
+
     artifacts:
       - build/ipa/HubbettControl.ipa
+      - build/HubbettControl.xcarchive/Products/Applications/*.app
