@@ -36,14 +36,15 @@ extension BLEManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover p: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        let name = p.name ?? (advertisementData[CBAdvertisementDataLocalNameKey] as? String) ?? ""
-        if name.contains("Hubbett") || name.contains("HUBBETT") {
-            device = p
-            status = "Verbinde…"
-            central.stopScan()
-            central.connect(p, options: nil)
-        }
+    let name = p.name ?? (advertisementData[CBAdvertisementDataLocalNameKey] as? String) ?? ""
+    if name == "HUBBETT-iOS" {
+        device = p
+        status = "Verbinde…"
+        central.stopScan()
+        central.connect(p, options: nil)
     }
+}
+
     
     func centralManager(_ central: CBCentralManager, didConnect p: CBPeripheral) {
         verbunden = true
