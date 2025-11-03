@@ -12,7 +12,16 @@ workflows:
           set -e
           xcodebuild clean -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME"
           mkdir -p build/ipa
-          xcodebuild             -project "$XCODE_PROJECT"             -scheme "$XCODE_SCHEME"             -configuration Release             -sdk iphoneos             -archivePath build/HubbettControl.xcarchive             archive             CODE_SIGN_IDENTITY=""             CODE_SIGNING_REQUIRED=NO             CODE_SIGNING_ALLOWED=NO
+          xcodebuild \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/HubbettControl.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
       - name: Create unsigned .ipa manually
         script: |
           mkdir -p build/ipa/Payload
